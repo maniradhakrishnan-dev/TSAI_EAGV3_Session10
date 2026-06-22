@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Canvas Target Game</title>
+    <style>
+        body {
+            background: #0f0f13;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 40px;
+        }
+        canvas {
+            background: #1a1a24;
+            border: 2px solid #3b3b4f;
+            border-radius: 8px;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.6);
+            cursor: crosshair;
+        }
+        h1 {
+            color: #a855f7;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #94a3b8;
+            margin-bottom: 25px;
+        }
+        #score-board {
+            font-size: 1.2rem;
+            color: #38bdf8;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Canvas Target Game</h1>
+    <p>Using vision, find and click the center of the green target circle with the red bullseye.</p>
+    <canvas id="gameCanvas" width="500" height="400"></canvas>
+    <div id="score-board">Clicks Registered: <span id="score">0</span></div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreEl = document.getElementById('score');
+        let clicks = 0;
+        
+        function draw(hit = false) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw background grid lines
+            ctx.strokeStyle = '#2b2b3f';
+            ctx.lineWidth = 1;
+            for(let x = 50; x < canvas.width; x += 50) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+            }
+            for(let y = 50; y < canvas.height; y += 50) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+            }
+            
+            if (hit) {
+                // Flash golden target on hit
+                ctx.fillStyle = '#fbbf24';
+                ctx.beginPath();
+                ctx.arc(250, 200, 45, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                // Green target
+                ctx.fillStyle = '#22c55e';
+                ctx.beginPath();
+                ctx.arc(250, 200, 35, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Inner red bullseye
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(250, 200, 12, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const dist = Math.sqrt((x - 250)**2 + (y - 200)**2);
+            if (dist <= 35) {
+                clicks++;
+                scoreEl.textContent = clicks;
+                draw(true);
+                setTimeout(() => draw(false), 300);
+            }
+        });
+        
+        draw();
+    </script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Email Draft Composer</title>
+    <style>
+        body {
+            background: #0f0f13;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+        .composer-card {
+            background: #1a1a24;
+            border: 2px solid #3b3b4f;
+            border-radius: 8px;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.6);
+            width: 500px;
+            padding: 30px;
+            text-align: left;
+        }
+        h1 {
+            color: #a855f7;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            border-bottom: 2px dashed #3b3b4f;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            background: #0f0f13;
+            border: 1px solid #3b3b4f;
+            border-radius: 6px;
+            color: white;
+            padding: 10px;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #a855f7;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        .btn-save {
+            background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            transition: opacity 0.2s;
+        }
+        .btn-save:hover {
+            opacity: 0.9;
+        }
+        #status-alert {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: 500;
+            text-align: center;
+            display: none;
+        }
+        #status-alert.success {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid #22c55e;
+            color: #4ade80;
+            display: block;
+        }
+        #status-alert.error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid #ef4444;
+            color: #f87171;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="composer-card">
+        <h1>New Message</h1>
+        
+        <div class="form-group">
+            <label for="to-field">To</label>
+            <input type="text" id="to-field" placeholder="recipient@example.com">
+        </div>
+        
+        <div class="form-group">
+            <label for="subject-field">Subject</label>
+            <input type="text" id="subject-field" placeholder="Draft subject">
+        </div>
+        
+        <div class="form-group">
+            <label for="body-field">Body</label>
+            <textarea id="body-field" placeholder="Type your message here..."></textarea>
+        </div>
+        
+        <button class="btn-save" id="btn-save-draft">Save Draft</button>
+        
+        <div id="status-alert"></div>
+    </div>
+
+    <script>
+        const toField = document.getElementById('to-field');
+        const subjectField = document.getElementById('subject-field');
+        const bodyField = document.getElementById('body-field');
+        const saveBtn = document.getElementById('btn-save-draft');
+        const statusAlert = document.getElementById('status-alert');
+
+        saveBtn.addEventListener('click', () => {
+            const to = toField.value.trim();
+            const subject = subjectField.value.trim();
+            const body = bodyField.value.trim();
+
+            if (!to || !subject || !body) {
+                statusAlert.className = 'error';
+                statusAlert.textContent = 'All fields must be filled out before saving draft!';
+                return;
+            }
+
+            if (!to.includes('@')) {
+                statusAlert.className = 'error';
+                statusAlert.textContent = 'Invalid email address in "To" field!';
+                return;
+            }
+
+            statusAlert.className = 'success';
+            statusAlert.textContent = 'Draft Saved Successfully';
+        });
+    </script>
+</body>
+</html>

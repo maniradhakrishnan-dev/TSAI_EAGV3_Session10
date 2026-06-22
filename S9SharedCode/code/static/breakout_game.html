@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Visual Breakout Game</title>
+    <style>
+        body {
+            background: #0f0f13;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 40px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        canvas {
+            background: #1a1a24;
+            border: 2px solid #3b3b4f;
+            border-radius: 8px;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.6);
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #a855f7;
+            margin-bottom: 5px;
+        }
+        p {
+            color: #94a3b8;
+            margin-bottom: 20px;
+        }
+        .btn-action {
+            background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+            margin: 0 10px;
+        }
+        .btn-action:hover {
+            opacity: 0.9;
+        }
+        #game-status {
+            font-size: 1.2rem;
+            color: #38bdf8;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Visual Breakout</h1>
+        <p>The game is paused. Locate the falling yellow puck, click on the canvas to align the blue paddle underneath it, and click "Launch / Step" to bounce the puck and break the bricks!</p>
+        
+        <canvas id="breakoutCanvas" width="500" height="400"></canvas>
+        
+        <div>
+            <button class="btn-action" id="btn-step">Launch / Step</button>
+            <button class="btn-action" id="btn-reset" style="background: #3b3b4f; box-shadow: none;">Reset Game</button>
+        </div>
+        
+        <div id="game-status">Status: Ready to Align</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('breakoutCanvas');
+        const ctx = canvas.getContext('2d');
+        const btnStep = document.getElementById('btn-step');
+        const btnReset = document.getElementById('btn-reset');
+        const statusEl = document.getElementById('game-status');
+
+        // Paddle properties
+        let paddleWidth = 80;
+        let paddleHeight = 12;
+        let paddleX = 100; // Left offset
+        const paddleY = canvas.height - 30;
+
+        // Puck properties
+        let puckX = 250;
+        let puckY = 150;
+        let puckRadius = 8;
+        let puckDX = 0;
+        let puckDY = 6;
+
+        // Bricks properties
+        const brickRowCount = 3;
+        const brickColumnCount = 6;
+        const brickWidth = 65;
+        const brickHeight = 20;
+        const brickPadding = 10;
+        const brickOffsetTop = 40;
+        const brickOffsetLeft = 30;
+
+        let bricks = [];
+        function initBricks() {
+            bricks = [];
+            for (let c = 0; c < brickColumnCount; c++) {
+                bricks[c] = [];
+                for (let r = 0; r < brickRowCount; r++) {
+                    bricks[c][r] = { x: 0, y: 0, status: 1 };
+                }
+            }
+        }
+
+        // Draw components
+        function drawPaddle() {
+            ctx.beginPath();
+            ctx.rect(paddleX, paddleY, paddleWidth, paddleHeight);
+            ctx.fillStyle = "#38bdf8"; // Neon blue paddle
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = "#38bdf8";
+            ctx.fill();
+            ctx.closePath();
+            ctx.shadowBlur = 0; // Reset shadow
+        }
+
+        function drawPuck() {
+            ctx.beginPath();
+            ctx.arc(puckX, puckY, puckRadius, 0, Math.PI * 2);
+            ctx.fillStyle = "#fbbf24"; // Neon yellow puck
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = "#fbbf24";
+            ctx.fill();
+            ctx.closePath();
+            ctx.shadowBlur = 0; // Reset shadow
+        }
+
+        function drawBricks() {
+            const colors = ["#ef4444", "#a855f7", "#22c55e"]; // red, purple, green
+            for (let c = 0; c < brickColumnCount; c++) {
+                for (let r = 0; r < brickRowCount; r++) {
+                    if (bricks[c][r].status === 1) {
+                        const brickX = c * (brickWidth + brickPadding) + brickOffsetLeft;
+                        const brickY = r * (brickHeight + brickPadding) + brickOffsetTop;
+                        bricks[c][r].x = brickX;
+                        bricks[c][r].y = brickY;
+                        ctx.beginPath();
+                        ctx.rect(brickX, brickY, brickWidth, brickHeight);
+                        ctx.fillStyle = colors[r % colors.length];
+                        ctx.fill();
+                        ctx.closePath();
+                    }
+                }
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw background grid lines
+            ctx.strokeStyle = '#2b2b3f';
+            ctx.lineWidth = 1;
+            for(let x = 50; x < canvas.width; x += 50) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+            }
+            for(let y = 50; y < canvas.height; y += 50) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+            }
+
+            drawBricks();
+            drawPaddle();
+            drawPuck();
+        }
+
+        // Align paddle on canvas click
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            // Center the paddle on click X position
+            paddleX = Math.max(0, Math.min(canvas.width - paddleWidth, clickX - paddleWidth / 2));
+            draw();
+            statusEl.textContent = `Status: Paddle Centered at X=${Math.round(paddleX + paddleWidth/2)}`;
+            statusEl.style.color = "#38bdf8";
+        });
+
+        // Run simulation step
+        btnStep.addEventListener('click', () => {
+            // Predict landing point or advance ball simulation until it reaches paddleY
+            // We run a fast loop of the puck moving down until it hits paddleY to see if paddle caught it.
+            let simulatedX = puckX;
+            let simulatedY = puckY;
+            let simulatedDX = puckDX;
+            let simulatedDY = puckDY;
+
+            let hit = false;
+            let steps = 0;
+
+            // Simple projection of ball trajectory down to paddle height
+            while (simulatedY < paddleY && steps < 100) {
+                simulatedX += simulatedDX;
+                simulatedY += simulatedDY;
+                
+                // Wall bounces
+                if (simulatedX + simulatedDX > canvas.width - puckRadius || simulatedX + simulatedDX < puckRadius) {
+                    simulatedDX = -simulatedDX;
+                }
+                steps++;
+            }
+
+            // Animate puck to this final landing point
+            puckX = simulatedX;
+            puckY = paddleY - puckRadius;
+
+            // Check hit
+            if (puckX >= paddleX && puckX <= paddleX + paddleWidth) {
+                // Bounce ball and break center brick for demonstration
+                puckDY = -puckDY;
+                // Break a random active brick
+                let broke = false;
+                for (let c = 0; c < brickColumnCount; c++) {
+                    for (let r = 0; r < brickRowCount; r++) {
+                        if (bricks[c][r].status === 1) {
+                            bricks[c][r].status = 0;
+                            broke = true;
+                            break;
+                        }
+                    }
+                    if (broke) break;
+                }
+                statusEl.textContent = "Status: HIT! Puck bounced successfully!";
+                statusEl.style.color = "#22c55e";
+            } else {
+                statusEl.textContent = "Status: GAME OVER! Paddle missed the puck!";
+                statusEl.style.color = "#ef4444";
+            }
+
+            draw();
+        });
+
+        btnReset.addEventListener('click', () => {
+            puckX = Math.floor(Math.random() * 200) + 150; // Random start X
+            puckY = 150;
+            paddleX = 100;
+            initBricks();
+            draw();
+            statusEl.textContent = "Status: Ready to Align";
+            statusEl.style.color = "#38bdf8";
+        });
+
+        // Initialize
+        initBricks();
+        draw();
+    </script>
+</body>
+</html>

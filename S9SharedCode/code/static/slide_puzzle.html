@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Visual Sliding Puzzle</title>
+    <style>
+        body {
+            background: #0f0f13;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 40px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        canvas {
+            background: #1a1a24;
+            border: 2px solid #3b3b4f;
+            border-radius: 8px;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.6);
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #a855f7;
+            margin-bottom: 5px;
+        }
+        p {
+            color: #94a3b8;
+            margin-bottom: 20px;
+        }
+        .control-panel {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+        select {
+            background: #1a1a24;
+            color: white;
+            border: 1px solid #3b3b4f;
+            padding: 8px 16px;
+            font-size: 1rem;
+            border-radius: 6px;
+            outline: none;
+            cursor: pointer;
+        }
+        .btn-action {
+            background: #3b3b4f;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+        .btn-action:hover {
+            opacity: 0.9;
+        }
+        #game-status {
+            font-size: 1.2rem;
+            color: #38bdf8;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Visual Sliding Puzzle</h1>
+        <p>The puzzle is rendered on a canvas. Slide the displaced tile to solve the puzzle. The empty space must end up in the bottom-right corner.</p>
+        
+        <div class="control-panel">
+            <label for="tile-select">Displaced Tile:</label>
+            <select id="tile-select">
+                <option value="1">Tile 1</option>
+                <option value="2">Tile 2</option>
+                <option value="3">Tile 3</option>
+                <option value="4">Tile 4</option>
+                <option value="5">Tile 5</option>
+                <option value="6" selected>Tile 6</option>
+                <option value="7">Tile 7</option>
+                <option value="8">Tile 8</option>
+            </select>
+            <button class="btn-action" id="btn-reset">Reset Board</button>
+        </div>
+
+        <canvas id="puzzleCanvas" width="360" height="360"></canvas>
+        
+        <div id="game-status">Status: Displaced tile 6 is out of position</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('puzzleCanvas');
+        const ctx = canvas.getContext('2d');
+        const btnReset = document.getElementById('btn-reset');
+        const tileSelect = document.getElementById('tile-select');
+        const statusEl = document.getElementById('game-status');
+
+        const gridSize = 3;
+        const tileSize = canvas.width / gridSize;
+
+        let targetTile = 6;
+        let board = [];
+
+        // Parse query parameter or load from localStorage
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryTile = parseInt(urlParams.get('tile') || '');
+        if (queryTile >= 1 && queryTile <= 8) {
+            targetTile = queryTile;
+            tileSelect.value = targetTile.toString();
+            localStorage.setItem('displacedTile', targetTile.toString());
+        } else {
+            const savedTile = localStorage.getItem('displacedTile');
+            if (savedTile) {
+                targetTile = parseInt(savedTile);
+                tileSelect.value = savedTile;
+            }
+        }
+
+        function initBoard() {
+            // Start with a solved layout
+            // 1 2 3
+            // 4 5 6
+            // 7 8 0
+            board = [
+                [1, 2, 3],
+                [4, 5, 6],
+                [7, 8, 0]
+            ];
+
+            if (targetTile >= 1 && targetTile <= 8) {
+                // Find solved position of targetTile
+                let targetR = -1, targetC = -1;
+                for (let r = 0; r < gridSize; r++) {
+                    for (let c = 0; c < gridSize; c++) {
+                        if (board[r][c] === targetTile) {
+                            targetR = r;
+                            targetC = c;
+                            break;
+                        }
+                    }
+                }
+
+                // Displace it: place empty slot 0 at targetTile's solved position,
+                // and place targetTile at the bottom-right corner (2, 2)
+                board[targetR][targetC] = 0;
+                board[2][2] = targetTile;
+            }
+
+            statusEl.textContent = `Status: Displaced tile ${targetTile} is out of position`;
+            statusEl.style.color = "#38bdf8";
+            drawBoard();
+        }
+
+        function drawBoard() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let r = 0; r < gridSize; r++) {
+                for (let c = 0; c < gridSize; c++) {
+                    const value = board[r][c];
+                    const x = c * tileSize;
+                    const y = r * tileSize;
+
+                    if (value !== 0) {
+                        ctx.fillStyle = "#27273a";
+                        ctx.fillRect(x + 5, y + 5, tileSize - 10, tileSize - 10);
+
+                        ctx.strokeStyle = "#a855f7";
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(x + 5, y + 5, tileSize - 10, tileSize - 10);
+
+                        ctx.fillStyle = "#ffffff";
+                        ctx.font = "bold 32px 'Inter', sans-serif";
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "middle";
+                        ctx.fillText(value, x + tileSize / 2, y + tileSize / 2);
+                    } else {
+                        ctx.fillStyle = "#11111b";
+                        ctx.fillRect(x + 5, y + 5, tileSize - 10, tileSize - 10);
+                    }
+                }
+            }
+        }
+
+        function getEmptyPos() {
+            for (let r = 0; r < gridSize; r++) {
+                for (let c = 0; c < gridSize; c++) {
+                    if (board[r][c] === 0) {
+                        return { r, c };
+                    }
+                }
+            }
+        }
+
+        function isSolved() {
+            let expected = 1;
+            for (let r = 0; r < gridSize; r++) {
+                for (let c = 0; c < gridSize; c++) {
+                    if (r === gridSize - 1 && c === gridSize - 1) {
+                        return board[r][c] === 0;
+                    }
+                    if (board[r][c] !== expected) {
+                        return false;
+                    }
+                    expected++;
+                }
+            }
+            return true;
+        }
+
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+
+            const c = Math.floor(clickX / tileSize);
+            const r = Math.floor(clickY / tileSize);
+
+            const clickedVal = board[r][c];
+            if (clickedVal === 0) return;
+
+            const empty = getEmptyPos();
+
+            // Swap the clicked tile with the empty space
+            board[empty.r][empty.c] = clickedVal;
+            board[r][c] = 0;
+            drawBoard();
+
+            if (isSolved()) {
+                statusEl.textContent = "Status: Solved!";
+                statusEl.style.color = "#22c55e";
+            } else {
+                statusEl.textContent = `Status: Interactive - tile ${targetTile} is at (${r}, ${c})`;
+                statusEl.style.color = "#38bdf8";
+            }
+        });
+
+        tileSelect.addEventListener('change', (e) => {
+            targetTile = parseInt(e.target.value);
+            localStorage.setItem('displacedTile', targetTile.toString());
+            initBoard();
+        });
+
+        btnReset.addEventListener('click', () => {
+            initBoard();
+        });
+
+        // Initialize
+        initBoard();
+    </script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Computer-Use Agent Dashboard</title>
+<meta name="description" content="Session 10 Computer-Use Agent — Real-time dashboard for running and monitoring desktop automation tasks.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/dashboard.css">
+</head>
+<body>
+
+<!-- Sidebar -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <span class="brand-icon">⌘</span>
+    <span class="brand-text">CUA Agent</span>
+  </div>
+  <div class="nav-links">
+    <a class="nav-link active" data-view="dashboard" id="nav-dashboard">
+      <span class="nav-icon">◉</span><span>Dashboard</span>
+    </a>
+    <a class="nav-link" data-view="history" id="nav-history">
+      <span class="nav-icon">◷</span><span>History</span>
+    </a>
+  </div>
+  <div class="sidebar-footer">
+    <div class="status-dot" id="ws-status"></div>
+    <span class="status-text" id="ws-status-text">Connecting…</span>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<main class="main" id="main-content">
+
+  <!-- Header -->
+  <header class="header">
+    <h1 class="page-title" id="page-title">Dashboard</h1>
+    <div class="header-badge">Session 10</div>
+  </header>
+
+  <!-- Dashboard View -->
+  <div class="view active" id="view-dashboard">
+
+    <!-- Preset Cards -->
+    <section class="section">
+      <h2 class="section-title">Task Presets</h2>
+      <div class="preset-grid" id="preset-grid"></div>
+    </section>
+
+    <!-- Run Task Form -->
+    <section class="section">
+      <h2 class="section-title">Run Task</h2>
+      <div class="card form-card">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="app-select">Application</label>
+            <select id="app-select">
+              <option value="Calculator">Calculator</option>
+              <option value="gedit">Gedit (Text Editor)</option>
+              <option value="Obsidian">Obsidian</option>
+              <option value="Chrome">Google Chrome</option>
+              <option value="Puzzle">Visual Sliding Puzzle</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="layer-select">Layer</label>
+            <select id="layer-select">
+              <option value="">Auto (Cascade)</option>
+              <option value="deterministic">2a — Deterministic</option>
+              <option value="a11y">2b — A11y + LLM</option>
+              <option value="vision">3 — Vision</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="goal-input">Goal</label>
+          <textarea id="goal-input" rows="2" placeholder="e.g. Calculate 143423 times 23"></textarea>
+        </div>
+        <button class="btn-run" id="btn-run" onclick="runTask()">
+          <span class="btn-icon">▶</span> Run Task
+        </button>
+        <button class="btn-stop" id="btn-stop" onclick="stopTask()" style="background: #ef4444; border: none; padding: 12px 24px; font-size: 1rem; font-weight: 600; border-radius: 6px; cursor: pointer; color: white; margin-left: 10px; display: none;">
+          <span class="btn-icon">■</span> Stop Task
+        </button>
+      </div>
+    </section>
+
+    <!-- Live Panel: Log + Result -->
+    <div class="live-grid">
+      <section class="section">
+        <h2 class="section-title">Live Log</h2>
+        <div class="card log-card">
+          <pre class="log-output" id="log-output"><span class="log-placeholder">Waiting for task…</span></pre>
+        </div>
+      </section>
+      <section class="section">
+        <h2 class="section-title">Result</h2>
+        <div class="card result-card" id="result-card">
+          <div class="result-placeholder" id="result-placeholder">
+            <span class="result-icon-big">⌘</span>
+            <p>Run a task to see results</p>
+          </div>
+          <div class="result-content hidden" id="result-content">
+            <div class="result-status" id="result-status-badge">—</div>
+            <div class="result-grid">
+              <div class="result-item"><span class="result-label">Layer</span><span class="result-value" id="r-path">—</span></div>
+              <div class="result-item"><span class="result-label">Turns</span><span class="result-value" id="r-turns">—</span></div>
+              <div class="result-item"><span class="result-label">App</span><span class="result-value" id="r-app">—</span></div>
+              <div class="result-item"><span class="result-label">Duration</span><span class="result-value" id="r-duration">—</span></div>
+            </div>
+            <div class="result-item full"><span class="result-label">Content</span><pre class="result-value" id="r-content">—</pre></div>
+            <div class="result-item full hidden" id="r-error-row"><span class="result-label">Error</span><pre class="result-value error" id="r-error">—</pre></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- History View -->
+  <div class="view" id="view-history">
+    <section class="section">
+      <h2 class="section-title">Run History</h2>
+      <div class="card">
+        <table class="history-table" id="history-table">
+          <thead><tr><th>Time</th><th>App</th><th>Goal</th><th>Layer</th><th>Status</th></tr></thead>
+          <tbody id="history-body"></tbody>
+        </table>
+        <p class="empty-state" id="history-empty">No runs yet.</p>
+      </div>
+    </section>
+  </div>
+
+</main>
+
+<script src="/static/dashboard.js"></script>
+</body>
+</html>

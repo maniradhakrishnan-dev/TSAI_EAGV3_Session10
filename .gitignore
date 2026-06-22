@@ -1,0 +1,45 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Environment variables / Secrets
+.env
+.env.local
+.env.*
+!.env.example
+
+# Temporary / Sandbox Browser Profiles
+sandbox_chrome_profile*/
+sandbox_chrome_profile_sliding puzzle/
+sandbox_chrome_profile_sliding_puzzle/
+
+# Dynamic Session / Run Dumps
+S9SharedCode/code/state/
+S9SharedCode/code/usage.json
+query_run_01.txt
+*state*.json
+*vision*.json
+*.log
+
+# Prototyping and Learning files
+learn/
