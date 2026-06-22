@@ -257,7 +257,7 @@ Below is a detailed inventory of files in the workspace, classifying their role 
 | `queries.md` | **Documentation** | **Tracked** | CLI command references for running specific tasks/tests. |
 | `Session_Summary.md` | **Reference Guide** | **Tracked** | Original session lectures explaining accessibility APIs, Wayland portals, and the cascade layer architecture. |
 | `assignment.md` | **Reference Guide** | **Tracked** | Assignment rules, tasks, and constraints description. |
-| `letsdothis.md` | **Reference Notes** | **Tracked** | User's initial bug reports and verification checklists. |
+| `letsdothis.md` | **Reference Notes** | **Ignored** | User's initial bug reports and verification checklists. |
 | **`.gitignore`** | **Git Exclusion Rules** | **Tracked** | Excludes cache, dependencies, and dynamically generated profile folders. |
 | **`learn/`** | **Developer Learning & Scratch** | **Ignored** | Ignored globally. Contains early prototyping validation scripts (`step1` to `step4`), images, and the cloned `cua-driver` repository. |
 | **`.env`** | **Environment Secrets** | **Ignored** | Local API keys, routing addresses. Excluded from version control for security. |
@@ -269,5 +269,5 @@ Below is a detailed inventory of files in the workspace, classifying their role 
 
 
 ## WORKING VIDEO
-
+Please check the agent working video here
 https://youtu.be/2kc250QLVb0
